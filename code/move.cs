@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
 
     private bool isGrounded;
     private bool isClimbing = false;
+    private bool canClimb = false; // 사다리 영역에 있는지 여부
 
     private Rigidbody2D rb;
     private Collider2D playerCollider;
@@ -27,16 +28,20 @@ public class PlayerController : MonoBehaviour
         Move();
         Jump();
         Crouch();
-        Climb(); // 사다리 움직임
+        ClimbControl(); // 사다리 시작/종료 조건 처리
+    }
+
+    void FixedUpdate()
+    {
+        Climb(); // 실제 사다리 이동
     }
 
     void Move()
     {
         float moveDirection = Input.GetAxisRaw("Horizontal");
 
-        // 사다리 중일 땐 좌우 이동 제한 (원하면 허용 가능)
-        if (!isClimbing)
-            rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
+        // 사다리 중에도 좌우 이동 가능
+        rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
 
         if (moveDirection != 0)
         {
@@ -65,17 +70,38 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void ClimbControl()
+    {
+        // ↑ 키를 누른 상태에서만 사다리 타기 시작
+        if (canClimb && Input.GetKey(KeyCode.UpArrow))
+        {
+            isClimbing = true;
+        }
+
+        // ✅ 좌우 방향 입력 시 사다리 상태 해제
+        if (isClimbing && Input.GetAxisRaw("Horizontal") != 0)
+        {
+            isClimbing = false;
+        }
+
+        // 사다리에서 내려왔거나 사다리 영역 벗어나면 종료
+        if (!canClimb)
+        {
+            isClimbing = false;
+        }
+    }
+
     void Climb()
     {
         if (isClimbing)
         {
-            float v = Input.GetAxisRaw("Vertical");
-            rb.velocity = new Vector2(0, v * climbSpeed);
+            float vertical = Input.GetAxisRaw("Vertical");
+            rb.velocity = new Vector2(0f, vertical * climbSpeed);
             rb.gravityScale = 0f;
         }
         else
         {
-            rb.gravityScale = 3f; // 원래 중력값
+            rb.gravityScale = 3f;
         }
     }
 
@@ -83,7 +109,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.CompareTag("Ladder"))
         {
-            isClimbing = true;
+            canClimb = true;
         }
     }
 
@@ -91,7 +117,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.CompareTag("Ladder"))
         {
-            isClimbing = false;
+            canClimb = false;
         }
     }
 
