@@ -1,0 +1,18 @@
+Build Settings 에 씬을 드래그해서 추가 버튼 오브젝트에 OnClick 이벤트 설정
+1. UI버튼 오브젝트 선택해서 
+2. Inspector에서 Button(Script)부분에 있는 On Click()이벤트 추가 
+3. + 버튼 클릭해서 새 이벤트 추가  
+4. SceneLoader가 붙어 있는 오브젝트를 드래그해서 넣기   
+5. 함수 선택: SceneLoader > LoadSceneByName(string)
+6. 파라미터에 이동하고 싶은 씬 이름 입력하기
+코드: 
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class SceneLoader : MonoBehaviour
+{
+    public void LoadSceneByName(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+}
